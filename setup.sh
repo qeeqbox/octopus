@@ -32,11 +32,15 @@ EOL
 }
 
 ssh () {
+port_="22"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-8.3p1.tar.gz && tar xvfz openssh-8.3p1.tar.gz 1>/dev/null
 sed '0,/struct passwd \*pw = authctxt->pw;/s//struct passwd \*pw = authctxt->pw;logit("Username %s Password %s",pw->pw_name,password);/' -i openssh-8.3p1/auth-passwd.c
 echo "sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin" >> /etc/passwd
 cd openssh-8.3p1 && ./configure 1>/dev/null && make 1>/dev/null && make install 1>/dev/null 
-sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin no/' /usr/local/etc/sshd_config && sed -ri 's/UsePAM yes/#UsePAM yes/g' /usr/local/etc/sshd_config && sed -ri 's/#Port 22/Port '$2'/g' /usr/local/etc/sshd_config
+sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin no/' /usr/local/etc/sshd_config && sed -ri 's/UsePAM yes/#UsePAM yes/g' /usr/local/etc/sshd_config && sed -ri 's/#Port 22/Port '$port_'/g' /usr/local/etc/sshd_config
 echo "AllowUsers $(head /dev/urandom | tr -dc A-Za-z0-9 | head -c50)" >> /usr/local/etc/sshd_config && echo "SyslogFacility AUTH" >> /usr/local/etc/sshd_config && echo "LogLevel VERBOSE" >> /usr/local/etc/sshd_config && echo "PasswordAuthentication yes" >> /usr/local/etc/sshd_config
 sed -i '/imklog/s/^/#/' /etc/rsyslog.conf
 rm -f $1 && echo "[X] SSHD Auth Logs" > $1 && chown syslog:adm $1
@@ -46,11 +50,15 @@ command=/usr/local/sbin/sshd -D -f /usr/local/etc/sshd_config
 autorestart=true
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nSSH Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nSSH Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 ldap (){
+port_="389"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 create_file $1
 echo 'slapd/root_password password sysbackup' | debconf-set-selections && \
 echo 'slapd/root_password_again password sysbackup' | debconf-set-selections && \
@@ -69,18 +77,22 @@ echo "slapd slapd/move_old_database boolean true" | debconf-set-selections && \
 dpkg-reconfigure -f noninteractive slapd
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:ldap]
-command=/usr/sbin/slapd -h "ldap://:$2/ ldaps:/// ldapi:///" -u openldap -g openldap -d 256
+command=/usr/sbin/slapd -h "ldap://:$port_/ ldaps:/// ldapi:///" -u openldap -g openldap -d 256
 stdout_logfile=$1
 stdout_logfile_maxbytes=0
 redirect_stderr=true
 autorestart=true
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nLDAP Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nLDAP Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 } 
 
 mysql () {
+port_="99"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 create_file $1
 { \
 echo mysql-community-server mysql-community-server/data-dir select ''; \
@@ -110,11 +122,15 @@ EOL
 }
 
 redis () {
+port_="6379"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 create_file $1
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install redis-server && \
 sed 's/^daemonize yes/daemonize no/' -i /etc/redis/redis.conf && \
 sed "s/^bind .*/bind 0.0.0.0/g" -i /etc/redis/redis.conf && \
-sed 's/port 6379/port '$2'/g' -i /etc/redis/redis.conf && \
+sed 's/port 6379/port '$port_'/g' -i /etc/redis/redis.conf && \
 sed 's/^# requirepass.*/requirepass sysbackup/' -i /etc/redis/redis.conf && \
 sed 's/^protected-mode yes/protected-mode no/' -i /etc/redis/redis.conf
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
@@ -131,11 +147,15 @@ stdout_logfile_maxbytes=0
 autorestart=true
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nREDIS Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nREDIS Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 mongodb (){
+port_="27017"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install mongodb && \
 mkdir -p /data/db
 #echo "Waiting on Mongodb to start.." && \
@@ -144,15 +164,19 @@ mkdir -p /data/db
 #mongo --eval 'db=db.getSiblingDB("admin");db.createUser({user:"root",pwd:"sysbackup",roles:["root"]})'
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:mongod]
-command=/usr/bin/mongod --quiet --logpath $1 --logappend --auth --bind_ip 0.0.0.0 --port $2
+command=/usr/bin/mongod --quiet --logpath $1 --logappend --auth --bind_ip 0.0.0.0 --port $port_
 autorestart=true
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nMONGODB Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nMONGODB Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 samba (){
+port_="445"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install samba-common samba 
 groupadd -g 1000 smbtemp && \
 useradd -g smbtemp -l -M -s /bin/false -u 1000 smbtemp && \
@@ -195,6 +219,10 @@ EOL
 }
 
 ftp (){
+port_="21"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 create_file $1
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install db-util vsftpd
 mkdir /etc/vsftpd/ && \
@@ -206,7 +234,7 @@ db_load -T -t hash -f /etc/vsftpd/virtual_users.txt /etc/vsftpd/virtual_users.db
 cat >>ftp.conf <<EOL
 listen=yes
 background=NO
-listen_port=$2
+listen_port=$port_
 anonymous_enable=YES
 local_enable=YES
 guest_enable=YES
@@ -236,11 +264,15 @@ command=vsftpd ftp.conf
 autorestart=true
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nFTP Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nFTP Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 vnc() {
+port_="5900"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 echo "[X] Creating $1 directory"
 mkdir -p $1
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install tightvncserver
@@ -252,21 +284,25 @@ mkdir -p /var/log/vnc/ && \
 ln -s /home/vncbackup/.vnc/ $1
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:vncd]
-command=su -c "vncserver -rfbport $2 -geometry 1280x800 :0 && sleep infinity" vncbackup
+command=su -c "vncserver -rfbport $port_ -geometry 1280x800 :0 && sleep infinity" vncbackup
 
 EOL
-echo -e "\n---------Settings---------\nLog folder location is $1\nVNC Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog folder location is $1\nVNC Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 xrdp() {
+port_="3389"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 create_file $1
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install xrdp
 cat >>/etc/xrdp/xrdp.ini <<EOL
 [globals]
 bitmap_cache=yes
 bitmap_compression=yes
-port=$2
+port=$port_
 crypt_level=low
 channel_code=1
 
@@ -288,11 +324,15 @@ cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 command=xrdp -nodaemon
 
 EOL
-echo -e "\n---------Settings---------\nLog file location is $1\nRDP Server port is $2\n--------------------------\n"
-ports_arr+=($2)
+echo -e "\n---------Settings---------\nLog file location is $1\nRDP Server port is $port_\n--------------------------\n"
+ports_arr+=($port_)
 }
 
 apache () {
+port_="80"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
 DEBIAN_FRONTEND=noninteractive apt-get -yqq install apache2
 a2dismod mpm_event && \
 a2enmod mpm_prefork ssl rewrite && \
@@ -303,6 +343,32 @@ sed s/LogFormat\ \"\%h/LogFormat\ \"\%\h:\%p/g -i etc/apache2/apache2.conf
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:apache]
 command=apache2ctl -DFOREGROUND
+autorestart=true
+
+EOL
+}
+
+squid () {
+port_="8080"
+if [ ! -z "$2" -a "$2" != "default" ]; then
+    port_=$2
+fi
+DEBIAN_FRONTEND=noninteractive apt-get -yqq install squid apache2-utils
+#access_log $2
+cat >> /etc/squid/squid.conf <<EOL
+http_port $port_
+auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd
+auth_param basic children 5
+auth_param basic realm Proxy Authentication Required
+auth_param basic credentialsttl 2 hours
+auth_param basic casesensitive off
+acl auth proxy_auth REQUIRED
+http_access allow auth
+EOL
+htpasswd -cb /etc/squid/passwd "sysbackup" "sysbackup"
+cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
+[program:squid]
+command=squid -NsYd 1
 autorestart=true
 
 EOL
@@ -334,20 +400,6 @@ config_iptables () {
     fi
 }
 
-setup_server() {
-    case $1 in
-    "ssh") ssh "/var/log/ssh.log" "22";;
-    "rdp") xrdp "/var/log/xrdp.log" "3389";;
-    "ldap") ldap "/var/log/ldap.log" "389";;
-    "ftp") ftp "/var/log/vsftpd.log" "21";;
-    "samba") samba "/var/log/smb.log" "445";;
-    "mongodb") mongodb "/var/log/mongodb/mongod.log" "27017";;
-    "redis") redis "/var/log/redis-monitor.log" "6379";;
-    "vnc") vnc "/var/log/vnc" "5900";;
-    *) echo "Invalid option";;
-    esac
-}
-
 setup_server_with_port() {
     case $1 in
     "ssh") ssh "/var/log/ssh.log" $2;;
@@ -358,6 +410,7 @@ setup_server_with_port() {
     "mongodb") mongodb "/var/log/mongodb/mongod.log" $2;;
     "redis") redis "/var/log/redis-monitor.log" $2;;
     "vnc") vnc "/var/log/vnc" $2;;
+    "proxy") squid "/var/log/squid/access.log" $2;;
     *) echo "Invalid option";;
     esac
 }
@@ -368,7 +421,7 @@ parse_input () {
     do
         servers_port=($(echo "$server" | tr ':' '\n'))
         if [ "${#servers_port[@]}" -eq 1 ]; then
-            setup_server ${servers_port[0]}
+            setup_server_with_port ${servers_port[0]} "default"
         elif [ "${#servers_port[@]}" -eq 2 ]; then 
             setup_server_with_port ${servers_port[0]} ${servers_port[1]}
         fi
