@@ -15,7 +15,7 @@ chmod +x setup.sh
 ```
 git clone https://github.com/qeeqbox/octopus
 chmod +x setup.sh
-./setup.sh "ssh:22,rdp:3389,ldap:389,ftp:21,samba:445,mongodb:27017,redis:6379,vnc:5900"
+./setup.sh "ssh:22,rdp:3389"
 ```
 
 ## Current Servers (10 out 41)
