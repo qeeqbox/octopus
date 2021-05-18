@@ -1,6 +1,6 @@
 <p align="center"> <img src="https://raw.githubusercontent.com/qeeqbox/octopus/main/readme/octopus.png"></p>
 
-Deploy single or multiple different Honeypots with supervisor. The Honeypots are regular or modified servers with custom settings. This will configure them with for a temp username and password. Also, output the logs into /var/log folder for easy integration with tools such as filebeat and logstach
+Deploy single or multiple Honeypots with supervisor. The Honeypots are regular or modified servers with custom settings. This will configure them with a temp username and password. Also, output the logs into /var/log folder for easy integration with tools such as filebeat and logstach
 
 If you are interested in emulators not servers, check out the Honeypots python package (pip3 install honeypots)
 
