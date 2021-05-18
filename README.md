@@ -1,20 +1,18 @@
 <p align="center"> <img src="https://raw.githubusercontent.com/qeeqbox/octopus/main/readme/octopus.png"></p>
 
-Deploy single or multiple Honeypots with supervisor. The Honeypots are regular or modified servers with custom settings. This will configure them with a temp username and password. Also, output the logs into /var/log folder for easy integration with tools such as filebeat and logstach
+Deploy a single Honeypot or multiple Honeypots with an automated bash script. All honeypots are regular servers (Not emulators) with specific settings\configurations. And, they should log all the actions into `/var/log/` folder. This folder is adjustable based on your needs.
 
 If you are interested in emulators not servers, check out the Honeypots python package (pip3 install honeypots)
 
 ## Install & setup with defualt ports
 ```
-git clone https://github.com/qeeqbox/octopus
-chmod +x setup.sh
+git clone https://github.com/qeeqbox/octopus.git && cd octopus && chmod +x setup.sh
 ./setup.sh "ssh,rdp,ldap,ftp,samba,mongodb,redis,vnc"
 ```
 
 ## Install & setup with ports
 ```
-git clone https://github.com/qeeqbox/octopus
-chmod +x setup.sh
+git clone https://github.com/qeeqbox/octopus.git && cd octopus && chmod +x setup.sh
 ./setup.sh "ssh:22,rdp:3389"
 ```
 
