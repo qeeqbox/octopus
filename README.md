@@ -18,15 +18,25 @@ git clone https://github.com/qeeqbox/octopus.git && cd octopus && chmod +x setup
 
 ## Current Servers (10 out 41)
 - ssh using modfided version of OpenSSH
+- - Log file: `/var/log/auth.log`
 - ldap using slapd with custom settings
+- - Log file: `/var/log/ldap.log`
 - mysql using mysql-server with custom settings
+- - Log file: 
 - redis using redis-server with custom settings
+- - Log file: `/var/log/redis-monitor.log`
 - mongodb using mongodb
+- - Log file: `/var/log/mongodb/mongod.log`
 - samba using samba with custom settings
+- - Log file: `/var/log/smb.log`
 - ftp using vsftpd with custom settings
+- - Log file: `/var/log/vsftpd.log`
 - vnc using tightvncserver
+- - Log folder: `/var/log/vnc`
 - rdp using xrdp with custom settings
+- - Log file: `/var/log/xrdp.log`
 - apache using apache2 with custom settings
+- - Log file:
 
 ## acknowledgement
 By using this framework, you are accepting the license terms of all these packages: `OpenSSH slapd mysql-server redis-server mongodb samba vsftpd tightvncserver xrdp apache2`
