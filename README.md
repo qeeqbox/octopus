@@ -18,38 +18,38 @@ git clone https://github.com/qeeqbox/octopus.git && cd octopus && chmod +x setup
 
 ## Current Servers (10 out 41)
 - ssh using modfided version of OpenSSH
-- - Port: 22
-- - Log file: `/var/log/auth.log`
+  - Port: `22`
+  - Log file: `/var/log/auth.log`
 - ldap using slapd with custom settings
-- - Port: 389
-- - Log file: `/var/log/ldap.log`
+  - Port: `389`
+  - Log file: `/var/log/ldap.log`
 - mysql using mysql-server with custom settings
-- - Port: 
-- - Log file: 
+  - Port: 
+  - Log file: 
 - redis using redis-server with custom settings
-- - Port: 6379
-- - Log file: `/var/log/redis-monitor.log`
+  - Port: `6379`
+  - Log file: `/var/log/redis-monitor.log`
 - mongodb using mongodb
-- - Port: 27017
-- - Log file: `/var/log/mongodb/mongod.log`
+  - Port: `27017`
+  - Log file: `/var/log/mongodb/mongod.log`
 - samba using samba with custom settings
-- - Port: 445
-- - Log file: `/var/log/smb.log`
+  - Port: `445`
+  - Log file: `/var/log/smb.log`
 - ftp using vsftpd with custom settings
-- - Port: 21
-- - Log file: `/var/log/vsftpd.log`
+  - Port: `21`
+  - Log file: `/var/log/vsftpd.log`
 - vnc using tightvncserver
-- - Port: 5900
-- - Log folder: `/var/log/vnc`
+  - Port: `5900`
+  - Log folder: `/var/log/vnc`
 - rdp using xrdp with custom settings
-- - Port: 3389
-- - Log file: `/var/log/xrdp.log`
+  - Port: `3389`
+  - Log file: `/var/log/xrdp.log`
 - http\https using apache2 with custom settings
-- - Port: 80\443
-- - Log file:
+  - Port: `80\443`
+  - Log file:
 - proxy using squid with custom settings
-- - Port: 8080
-- - Log file: `/var/log/proxy.log`
+  - Port: `8080`
+  - Log file: `/var/log/proxy.log`
 
 ## acknowledgement
 By using this framework, you are accepting the license terms of all these packages: `OpenSSH slapd mysql-server redis-server mongodb samba vsftpd tightvncserver xrdp apache2`
