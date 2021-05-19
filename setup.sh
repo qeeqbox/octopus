@@ -13,8 +13,10 @@ export DEBIAN_FRONTEND=noninteractive
 ports_arr=()
 
 req() {
-    echo "[X] Setting up required packages wget zlib1g-dev build-essential libssl-dev lsof rsyslog supervisor iptables sudo apt-utils"
-	DEBIAN_FRONTEND=noninteractive apt-get -yqq update && DEBIAN_FRONTEND=noninteractive apt-get -yqq install wget zlib1g-dev build-essential libssl-dev lsof rsyslog supervisor iptables sudo apt-utils 1>/dev/null
+    echo "[X] Updating apt-get and installing apt-utils"
+	apt-get -yqq update > /dev/null && apt-get -yqq install apt-utils > /dev/null
+    echo "[X] Installing required packages wget zlib1g-dev build-essential libssl-dev lsof rsyslog supervisor iptables sudo"
+    DEBIAN_FRONTEND=noninteractive apt-get -yqq install wget zlib1g-dev build-essential libssl-dev lsof rsyslog supervisor iptables sudo apt-utils 1>/dev/null
 }
 
 supervisord() {
@@ -229,7 +231,7 @@ if [ -x "/usr/sbin/smbd" ]; then
     mkdir -p /smbtemp && \
     chown -R smbtemp:smbtemp smbtemp
     echo "[X] Applying custom settings smb.conf"
-cat >>smb.conf <<EOL
+cat >>/etc/smb_.conf <<EOL
 [global]
     workgroup = intcorp1
     server string = SMB Internal Server
@@ -261,7 +263,7 @@ printf "sysbackup\nsysbackup" | smbpasswd -a -s -c smb.conf smbtemp
 echo "[X] Setting up supervisord entry /etc/supervisor/conf.d/supervisord.conf"
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:smbd]
-command=smbd --foreground --no-process-group --configfile /smb.conf
+command=smbd --foreground --no-process-group --configfile /etc/smb_.conf
 autorestart=true
 
 EOL
@@ -283,16 +285,16 @@ DEBIAN_FRONTEND=noninteractive apt-get -yqq install db-util vsftpd 1> /dev/null
 if [ -x "/usr/sbin/vsftpd" ]; then
     echo "[X] Creating up /etc/vsftpd/"
     mkdir /etc/vsftpd/ && \
-    echo "[X] Creating up /home/vsftpd/ftpbackup"
+    echo "[X] Creating up /home/vsftpd/ftpbackup" && \
     mkdir -p /home/vsftpd/ftpbackup && \
-    echo "[X] Creating up /var/run/vsftpd/empty"
+    echo "[X] Creating up /var/run/vsftpd/empty" && \
     mkdir -p /var/run/vsftpd/empty && \
     chown -R ftp:ftp /home/vsftpd/ && \
-    echo "[X] Setting up ftp username and password"
+    echo "[X] Setting up ftp username and password" && \
     echo -e "ftpbackup\nsysbackup" > /etc/vsftpd/virtual_users.txt && \
     db_load -T -t hash -f /etc/vsftpd/virtual_users.txt /etc/vsftpd/virtual_users.db
-    echo "[X] Applying custom settings ftp.conf"
-cat >>ftp.conf <<EOL
+    echo "[X] Applying custom settings /etc/ftp_.conf"
+cat >>/etc/ftp_.conf <<EOL
 listen=yes
 background=NO
 listen_port=$port_
@@ -322,7 +324,7 @@ session required    pam_loginuid.so' > /etc/pam.d/vsftpdv
 echo "[X] Setting up supervisord entry /etc/supervisor/conf.d/supervisord.conf"
 cat >>/etc/supervisor/conf.d/supervisord.conf <<EOL
 [program:vsftpd]
-command=vsftpd ftp.conf
+command=vsftpd /etc/ftp_.conf
 autorestart=true
 
 EOL
