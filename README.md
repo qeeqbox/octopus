@@ -1,6 +1,6 @@
 <p align="center"> <img src="https://raw.githubusercontent.com/qeeqbox/octopus/main/readme/octopus.png"></p>
 
-Deploy one Honeypot or multiple Honeypots with an automated bash script. All honeypots are regular servers (Not emulators) with dummy settings\configurations. And, they should log their actions into `/var/log/` folder. This folder is adjustable based on your needs.
+Deploy one or multiple Honeypots with an automated bash script. All honeypots are regular servers (Not emulators) with dummy settings\configurations. And, they should log their actions into `/var/log/` folder. This folder is adjustable based on your needs.
 
 If you are interested in emulators not servers, check out the Honeypots python package (pip3 install honeypots)
 
